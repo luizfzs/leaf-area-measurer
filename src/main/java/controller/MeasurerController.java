@@ -15,10 +15,6 @@ import java.util.stream.Collectors;
  */
 public class MeasurerController {
 
-    public static void main(String[] args){
-        new MeasurerController().processFiles(new File("data"), null);
-    }
-
     public void processFiles(File directory, File template){
         System.out.println(directory.getAbsolutePath());
 
@@ -30,9 +26,9 @@ public class MeasurerController {
             if(template == null){
                 throw new NoAreaTemplateFoundException(directory.getAbsolutePath());
             }
-            // TODO call processing method
 
             if(checkImageFiles(directory)) {
+                // TODO call processing method
                 System.out.println("Processing images at directory " + directory.getAbsolutePath());
                 System.out.println(Arrays.stream(getImageFiles(directory)).map(x -> x.getName()).collect(Collectors.toList()));
             } else {
