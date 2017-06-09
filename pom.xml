@@ -32,9 +32,6 @@
                     <compilerVersion>1.8</compilerVersion>
                     <target>1.8</target>
                     <source>1.8</source>
-                    <compilerArgs>
-                        <arg>-Xlint:all,-processing</arg>
-                    </compilerArgs>
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>
                 </configuration>
