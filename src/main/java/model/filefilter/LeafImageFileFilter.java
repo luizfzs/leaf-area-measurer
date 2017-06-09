@@ -11,6 +11,7 @@ import java.io.FileFilter;
 public class LeafImageFileFilter implements FileFilter {
     @Override
     public boolean accept(File file) {
-        return file.getName().matches(Parameters.IMAGE_FORMATS_REGEX);
+        return !file.getName().startsWith(Parameters.TEMPLATE_FILE_PREFIX)
+                && file.getName().matches(Parameters.IMAGE_FORMATS_REGEX);
     }
 }
