@@ -1,3 +1,5 @@
+package controller;
+
 import org.bytedeco.javacv.JavaCV;
 import org.junit.Test;
 
