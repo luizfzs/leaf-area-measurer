@@ -11,6 +11,8 @@ import java.io.FileFilter;
 public class AreaTemplateFileFilter implements FileFilter {
     @Override
     public boolean accept(File file) {
-        return !file.isDirectory() && file.getName().startsWith(Parameters.TEMPLATE_FILE_PREFIX);
+        return !file.isDirectory()
+                && file.getName().startsWith(Parameters.TEMPLATE_FILE_PREFIX)
+                && file.getName().matches(Parameters.IMAGE_FORMATS_REGEX);
     }
 }
