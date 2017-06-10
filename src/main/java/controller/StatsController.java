@@ -19,10 +19,6 @@ import static java.nio.file.StandardOpenOption.*;
  */
 public class StatsController {
 
-    public static void main(String[] args) throws IOException {
-        new StatsController().aggregateStats(new File("data"));
-    }
-
     public void aggregateStats(File currentDirectory) throws IOException {
         if(DirectoryHelper.checkLeafDirectory(currentDirectory)){
             processDirectory(currentDirectory);
