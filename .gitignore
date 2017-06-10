@@ -117,3 +117,5 @@ hs_err_pid*
 
 
 data/
+
+\.idea/kotlinc\.xml

@@ -32,31 +32,9 @@ public class TestMeasurerController {
         return data;
     }
 
-    public File createNotLeafDirectory() throws IOException{
-        File data = getRootDirectory();
-        root.newFolder(data.getName(), "data-sub1");
-        return data;
-    }
-
     @Before
     public void createMeasurerController(){
         measurerController = new MeasurerController();
-    }
-
-    @Test
-    public void shouldReturnTrueForLeafDirectoryEmpty() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        File dir = createLeafDirectory();
-        Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkLeafDirectory", File.class);
-        methodUnderTest.setAccessible(true);
-        Assert.assertTrue((Boolean) methodUnderTest.invoke(measurerController, dir));
-    }
-
-    @Test
-    public void shouldReturnFalseForLeafDirectoryEmpty() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        File dir = createNotLeafDirectory();
-        Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkLeafDirectory", File.class);
-        methodUnderTest.setAccessible(true);
-        Assert.assertFalse((Boolean) methodUnderTest.invoke(measurerController, dir));
     }
 
     @Test
