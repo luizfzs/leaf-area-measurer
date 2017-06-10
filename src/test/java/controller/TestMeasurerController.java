@@ -44,22 +44,6 @@ public class TestMeasurerController {
     }
 
     @Test
-    public void shouldReturnTrueForLeafDirectoryEmpty() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        File dir = createLeafDirectory();
-        Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkLeafDirectory", File.class);
-        methodUnderTest.setAccessible(true);
-        Assert.assertTrue((Boolean) methodUnderTest.invoke(measurerController, dir));
-    }
-
-    @Test
-    public void shouldReturnFalseForLeafDirectoryEmpty() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        File dir = createNotLeafDirectory();
-        Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkLeafDirectory", File.class);
-        methodUnderTest.setAccessible(true);
-        Assert.assertFalse((Boolean) methodUnderTest.invoke(measurerController, dir));
-    }
-
-    @Test
     public void shouldReturnFalseForCheckTemplateFile() throws IOException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         File dir = createLeafDirectory();
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkTemplateFile", File.class);
