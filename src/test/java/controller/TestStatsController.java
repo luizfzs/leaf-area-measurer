@@ -107,11 +107,6 @@ public class TestStatsController {
         readStatFromFile.setAccessible(true);
         String readAggregateStatsFileContent = (String) readStatFromFile.invoke(statsController, aggregateStatFile);
 
-        System.out.println(aggregateStatFileContent);
-        System.out.println(aggregateStatFileContent.length());
-        System.out.println(readAggregateStatsFileContent);
-        System.out.println(readAggregateStatsFileContent.length());
-
         Assert.assertTrue("Content of aggregated file is wrong",
                 readAggregateStatsFileContent.equals(aggregateStatFileContent.toString()));
 
