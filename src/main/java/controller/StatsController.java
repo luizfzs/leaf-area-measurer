@@ -9,6 +9,8 @@ import model.filefilter.StatsFileFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import static java.nio.file.StandardOpenOption.*;
 
@@ -57,6 +59,7 @@ public class StatsController {
 
     private void processStatFiles(File[] stats, File aggregateStat) throws IOException {
         String stat;
+        Arrays.sort(stats);
         for(File statFile : stats){
             if(statFile.getAbsolutePath().equals(aggregateStat.getAbsolutePath())){
                 continue;
