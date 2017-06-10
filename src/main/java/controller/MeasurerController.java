@@ -2,6 +2,7 @@ package controller;
 
 import exceptions.MoreThanOneTemplateException;
 import exceptions.NoAreaTemplateFoundException;
+import helper.DirectoryHelper;
 import model.filefilter.AreaTemplateFileFilter;
 import model.Parameters;
 import model.filefilter.LeafImageFileFilter;
@@ -22,7 +23,7 @@ public class MeasurerController {
             template = getTemplateFile(directory);
         }
 
-        if(checkLeafDirectory(directory)){
+        if(DirectoryHelper.checkLeafDirectory(directory)){
             if(template == null){
                 throw new NoAreaTemplateFoundException(directory.getAbsolutePath());
             }
@@ -57,10 +58,6 @@ public class MeasurerController {
             return currentDirectory.listFiles(new AreaTemplateFileFilter())[0];
         }
         throw new NoAreaTemplateFoundException(currentDirectory.getAbsolutePath());
-    }
-
-    private boolean checkLeafDirectory(File directory){
-        return Arrays.stream(directory.listFiles()).filter(x -> x.isDirectory()).toArray().length == 0;
     }
 
     private boolean checkImageFiles(File currentDirectory){
