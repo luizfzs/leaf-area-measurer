@@ -32,12 +32,6 @@ public class TestMeasurerController {
         return data;
     }
 
-    public File createNotLeafDirectory() throws IOException{
-        File data = getRootDirectory();
-        root.newFolder(data.getName(), "data-sub1");
-        return data;
-    }
-
     @Before
     public void createMeasurerController(){
         measurerController = new MeasurerController();
