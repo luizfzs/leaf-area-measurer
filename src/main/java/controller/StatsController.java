@@ -33,20 +33,30 @@ public class StatsController {
     }
 
     private void processDirectory(File currentDirectory) throws IOException {
-        String stat;
         File[] stats = currentDirectory.listFiles(new StatsFileFilter());
-        File aggregateStat = new File(currentDirectory.getAbsolutePath()
-                + "/" + currentDirectory.getName()
-                + Parameters.STATS_FILE_EXTENSION_WITH_DOT);
-        Files.write(
-                aggregateStat.toPath(),
-                "".getBytes(),
-                CREATE, TRUNCATE_EXISTING, WRITE);
+        File aggregateStat = createAggregateStatFile(currentDirectory);
 
         if(!aggregateStat.exists() && !aggregateStat.createNewFile()){
             throw new CouldNotCreateStatFileException(currentDirectory.getAbsolutePath());
         }
 
+        processStatFiles(stats, aggregateStat);
+    }
+
+    private File createAggregateStatFile(File currentDirectory) throws IOException {
+        File aggregateStat = createAggregateFileOnFileSystem(currentDirectory);
+        FileHelper.truncateFile(aggregateStat);
+        return aggregateStat;
+    }
+
+    private File createAggregateFileOnFileSystem(File currentDirectory) {
+        return new File(currentDirectory.getAbsolutePath()
+                    + "/" + currentDirectory.getName()
+                    + Parameters.STATS_FILE_EXTENSION_WITH_DOT);
+    }
+
+    private void processStatFiles(File[] stats, File aggregateStat) throws IOException {
+        String stat;
         for(File statFile : stats){
             if(statFile.getAbsolutePath().equals(aggregateStat.getAbsolutePath())){
                 continue;
