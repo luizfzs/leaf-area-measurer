@@ -5,7 +5,7 @@ package model;
  */
 public class Parameters {
 
-    public static final String TEMPLATE_FILE_PREFIX = "area-template";
+    public static final String TEMPLATE_FILE_PREFIX = "area-template-";
 
     public static final String STATS_FILE_EXTENSION = "txt";
 
