@@ -1,6 +1,8 @@
 package controller;
 
+import model.TemplateInfo;
 import model.filefilter.AreaTemplateFileFilter;
+import org.opencv.core.Scalar;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +15,9 @@ public class MainController {
     public static void main(String[] args) throws IOException {
         loadOpenCV();
         AreaMeasurerController amc = new AreaMeasurerController();
-        amc.getAreaFromImageFile(new File("data").listFiles(new AreaTemplateFileFilter())[0]);
+        TemplateInfo templateInfo = amc.processAreaTemplate(new File("data").listFiles(new AreaTemplateFileFilter())[0]);
+        System.out.println(templateInfo);
+
     }
 
     private static void loadOpenCV() throws IOException {

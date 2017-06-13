@@ -2,15 +2,12 @@ package controller;
 
 import helper.FileHelper;
 import model.Parameters;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
+import model.TemplateInfo;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,31 +19,71 @@ import static org.opencv.highgui.Highgui.imwrite;
  */
 public class AreaMeasurerController {
 
-    public Double getAreaFromImageFile(File imageFile){
-        return getAreaFromImageFile(imageFile, 2, 0);
+    public Double getAreaFromImageFile(File imageFile, Double areaPerPixel){
+        return getAreaFromImageFile(imageFile, areaPerPixel, 3, 3);
     }
 
-    private Double getAreaFromImageFile(File imageFile, int matSize, int algFlags){
-        double sumAreas = 0.0;
-        Double resultArea = null;
+    public TemplateInfo processAreaTemplate(File areaTemplateImage){
+        TemplateInfo templateInfo = new TemplateInfo();
         ArrayList<MatOfPoint> imageContours = new ArrayList<>();
+        Rect boundingRectangle;
 
-        Double templateArea = getAreaOfTemplateFromFileName(imageFile.getName());
-        Mat image = loadImage(imageFile);
-
-        preProcessImage(image, matSize, algFlags);
-        processContours(imageContours, image);
-        imageContours = filterAreasByMinimumValue(imageContours);
-
-        Iterator<MatOfPoint> each = imageContours.iterator();
-        while(each.hasNext()){
-            MatOfPoint wrapper = each.next();
-            double area = Imgproc.contourArea(wrapper);
-            sumAreas += area;
+        Point dimensions = getAreaOfTemplateFromFileName(areaTemplateImage.getName());
+        Mat coloredAreaTemplateMat = loadImage(areaTemplateImage);
+        Mat grayAreaTemplateMat = coloredAreaTemplateMat.clone();
+        preProcessImage(grayAreaTemplateMat, 0, 0);
+        processContours(imageContours, grayAreaTemplateMat);
+        boundingRectangle = getBoundingRect(imageContours);
+        
+        if(Parameters.IMAGE_DEBUGGING) {
+            drawBoundingRectangle(boundingRectangle, dimensions, coloredAreaTemplateMat);
+            writeImage(coloredAreaTemplateMat, "identified-template.jpg");
         }
 
-        System.out.println(matSize + "," + algFlags + "," + templateArea + "," + (templateArea / sumAreas));
+        templateInfo.setRatio((dimensions.x / dimensions.y));
+        return templateInfo;
+    }
 
+    private void drawBoundingRectangle(Rect boundingRectangle, Point dimensions, Mat coloredAreaTemplateMat) {
+        Core.rectangle(
+                coloredAreaTemplateMat,
+                new Point(boundingRectangle.x, boundingRectangle.y),
+                new Point(boundingRectangle.x + boundingRectangle.width, boundingRectangle.y + boundingRectangle.height),
+                new Scalar(0, 255, 0, 0),
+                6);
+
+        Core.putText(
+                coloredAreaTemplateMat,
+                String.valueOf(dimensions.x),
+                new Point(boundingRectangle.x, boundingRectangle.y - 10),
+                Core.FONT_HERSHEY_TRIPLEX,
+                8.0,
+                new Scalar(0, 255, 0, 0));
+
+        Core.putText(
+                coloredAreaTemplateMat,
+                String.valueOf(dimensions.y),
+                new Point(boundingRectangle.x + boundingRectangle.width, boundingRectangle.y + 150),
+                Core.FONT_HERSHEY_TRIPLEX,
+                8.0,
+                new Scalar(0, 255, 0, 0));
+    }
+
+    private Rect getBoundingRect(ArrayList<MatOfPoint> imageContours) {
+        MatOfPoint2f imageContour2f = new MatOfPoint2f();
+        MatOfPoint2f approxContour2f = new MatOfPoint2f();
+        MatOfPoint approxContour = new MatOfPoint();
+
+        imageContours = filterAreasByMinimumValue(imageContours);
+        imageContours.get(0).convertTo(imageContour2f, CvType.CV_32FC2);
+        Imgproc.approxPolyDP(imageContour2f, approxContour2f, Imgproc.arcLength(imageContour2f, true) * 0.04, true);
+        approxContour2f.convertTo(approxContour, CvType.CV_32S);
+
+        return Imgproc.boundingRect(approxContour);
+    }
+
+    private Double getAreaFromImageFile(File imageFile, Double areaPerPixel, int matSize, int algFlags){
+        Double resultArea = null;
         return resultArea;
     }
 
@@ -65,7 +102,7 @@ public class AreaMeasurerController {
         Imgproc.drawContours(image, imageContours, -1, new Scalar(255, 0, 0), 3);
     }
 
-    private Double getAreaOfTemplateFromFileName(String fileName){
+    private Point getAreaOfTemplateFromFileName(String fileName){
         String fileNameWithoutExtension = FileHelper.getNameWithoutExtension(fileName);
         String dimensionsStr = fileNameWithoutExtension.replace(Parameters.TEMPLATE_FILE_PREFIX, "");
         String[] dimensions = dimensionsStr.split(Parameters.AREA_TEMPLATE_DIMENSION_SEPARATOR);
@@ -75,15 +112,17 @@ public class AreaMeasurerController {
         Matcher m2 = p.matcher(dimensions[1]);
 
         if(m1.find() && m2.find()){
-            return Double.parseDouble(m1.group(1)) * Double.parseDouble(m2.group(1));
+            return new Point(Double.parseDouble(m1.group(1)), Double.parseDouble(m2.group(1)));
         }
 
-        return 0.0;
+        return new Point(0,0);
     }
 
     private void preProcessImage(Mat image, int matSize, int algFlags){
+        changeLight(image, 2.0);
+
         Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.threshold(image, image, 150, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+        Imgproc.threshold(image, image, 100, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
         switch (algFlags){
             case 1:
                 Imgproc.erode(image, image, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(matSize, matSize)));
@@ -94,8 +133,21 @@ public class AreaMeasurerController {
             case 3:
                 Imgproc.erode(image, image, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(matSize, matSize)));
                 Imgproc.dilate(image, image, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(matSize, matSize)));
-
+                break;
         }
+    }
+
+    private void changeLight(Mat image, double factor) {
+        double[] point;
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2HLS);
+        for(int i = 0; i < image.height(); ++i){
+            for (int j = 0; j < image.width(); ++j){
+                point = image.get(i, j);
+                point[1] *= factor;
+                image.put(i, j, point);
+            }
+        }
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_HLS2BGR);
     }
 
     private Mat loadImage(File imageFile){

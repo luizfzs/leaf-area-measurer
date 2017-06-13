@@ -21,4 +21,6 @@ public class Parameters {
 
     public static final double MIN_AREA_THRESHOLD = 10000.0;
 
+    public static final boolean IMAGE_DEBUGGING = true;
+
 }
