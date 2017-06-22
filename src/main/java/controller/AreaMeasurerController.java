@@ -107,7 +107,7 @@ public class AreaMeasurerController {
         String dimensionsStr = fileNameWithoutExtension.replace(Parameters.TEMPLATE_FILE_PREFIX, "");
         String[] dimensions = dimensionsStr.split(Parameters.AREA_TEMPLATE_DIMENSION_SEPARATOR);
 
-        Pattern p = Pattern.compile(Parameters.AREA_TEMPLATE_DIMESION_REGEX);
+        Pattern p = Pattern.compile(Parameters.AREA_TEMPLATE_DIMENSION_REGEX);
         Matcher m1 = p.matcher(dimensions[0]);
         Matcher m2 = p.matcher(dimensions[1]);
 
