@@ -15,7 +15,7 @@ public class Parameters {
 
     public static final String STATS_FORMATS_REGEX = "([^\\s]+(\\.(?i)(" + STATS_FILE_EXTENSION + "))$)";
 
-    public static final String AREA_TEMPLATE_DIMESION_REGEX = "([\\d]+)([a-zA-Z]+)";
+    public static final String AREA_TEMPLATE_DIMENSION_REGEX = "([\\d]+)([a-zA-Z]+)";
 
     public static final String AREA_TEMPLATE_DIMENSION_SEPARATOR = "x";
 
