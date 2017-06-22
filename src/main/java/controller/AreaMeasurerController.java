@@ -19,10 +19,6 @@ import static org.opencv.highgui.Highgui.imwrite;
  */
 public class AreaMeasurerController {
 
-    public Double getAreaFromImageFile(File imageFile, Double areaPerPixel){
-        return getAreaFromImageFile(imageFile, areaPerPixel, 3, 3);
-    }
-
     public TemplateInfo processAreaTemplate(File areaTemplateImage){
         TemplateInfo templateInfo = new TemplateInfo();
         ArrayList<MatOfPoint> imageContours = new ArrayList<>();
@@ -34,7 +30,7 @@ public class AreaMeasurerController {
         preProcessImage(grayAreaTemplateMat, 0, 0);
         processContours(imageContours, grayAreaTemplateMat);
         boundingRectangle = getBoundingRect(imageContours);
-        
+
         if(Parameters.IMAGE_DEBUGGING) {
             drawBoundingRectangle(boundingRectangle, dimensions, coloredAreaTemplateMat);
             writeImage(coloredAreaTemplateMat, "identified-template.jpg");
