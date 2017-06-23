@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
  */
 public class TestMeasurerController {
 
+    public static final String AREA_TEMPLATE_1 = "area-template-1";
     @Rule
     public TemporaryFolder root = new TemporaryFolder();
 
@@ -48,7 +49,7 @@ public class TestMeasurerController {
     @Test
     public void shouldReturnTrueForCheckTemplateFile() throws IOException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".txt", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".txt", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkTemplateFile", File.class);
         methodUnderTest.setAccessible(true);
@@ -58,8 +59,8 @@ public class TestMeasurerController {
     @Test(expected = MoreThanOneTemplateException.class)
     public void shouldThrowExceptionMoreThanOneTemplateFileForCheckTemplateFile() throws Throwable {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".txt", dir);
-        File.createTempFile("area-template2",".txt", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".txt", dir);
+        File.createTempFile("area-template-2",".txt", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkTemplateFile", File.class);
         methodUnderTest.setAccessible(true);
@@ -86,7 +87,7 @@ public class TestMeasurerController {
     @Test
     public void shouldTemplateFilePngForGetTemplateFile() throws Throwable {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".png", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("getTemplateFile", File.class);
         methodUnderTest.setAccessible(true);
@@ -98,7 +99,7 @@ public class TestMeasurerController {
     @Test
     public void shouldTemplateJpgFileForGetTemplateFile() throws Throwable {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".jpg", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".jpg", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("getTemplateFile", File.class);
         methodUnderTest.setAccessible(true);
@@ -143,7 +144,7 @@ public class TestMeasurerController {
     @Test
     public void shouldReturnFalseForOnlyAreaTemplateForCheckImageFiles() throws Throwable {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".png", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("checkImageFiles", File.class);
         methodUnderTest.setAccessible(true);
@@ -154,7 +155,7 @@ public class TestMeasurerController {
     @Test
     public void shouldReturnEmptyListForOnlyAreaTemplateForGetImageFiles() throws Throwable {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".png", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("getImageFiles", File.class);
         methodUnderTest.setAccessible(true);
@@ -190,7 +191,7 @@ public class TestMeasurerController {
         File dir = createLeafDirectory();
         File.createTempFile("image1",".png", dir);
         File.createTempFile("image2",".jpg", dir);
-        File.createTempFile("area-template1",".jpg", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".jpg", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("getImageFiles", File.class);
         methodUnderTest.setAccessible(true);
@@ -203,7 +204,7 @@ public class TestMeasurerController {
         File dir = createLeafDirectory();
         File.createTempFile("image1",".png", dir);
         File.createTempFile("image2",".jpg", dir);
-        File.createTempFile("area-template1",".png", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
 
         Method methodUnderTest = measurerController.getClass().getDeclaredMethod("getImageFiles", File.class);
         methodUnderTest.setAccessible(true);
@@ -220,14 +221,14 @@ public class TestMeasurerController {
     @Test
     public void shouldPassRootDirHasOnlyAreaTemplateFile() throws IOException {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".png", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
         measurerController.processFiles(dir, null);
     }
 
     @Test
     public void shouldPassRootDirHasAreaTemplateFileAndOneImageFile() throws IOException {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".png", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
         File.createTempFile("image1",".png", dir);
         measurerController.processFiles(dir, null);
     }
@@ -235,7 +236,7 @@ public class TestMeasurerController {
     @Test
     public void shouldPassRootDirHasAreaTemplateFileAndMoreThanOneImageFile() throws IOException {
         File dir = createLeafDirectory();
-        File.createTempFile("area-template1",".png", dir);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
         File.createTempFile("image1",".png", dir);
         File.createTempFile("image2",".png", dir);
         measurerController.processFiles(dir, null);
@@ -245,7 +246,7 @@ public class TestMeasurerController {
     public void shouldPassRootDirHasAnotherDirInside() throws IOException {
         File dir = createLeafDirectory();
         root.newFolder(dir.getName(), "data-sub1");
-        File.createTempFile("area-template1",".png", dir.listFiles()[0]);
+        File.createTempFile(AREA_TEMPLATE_1,".png", dir.listFiles()[0]);
 
         measurerController.processFiles(dir, null);
     }

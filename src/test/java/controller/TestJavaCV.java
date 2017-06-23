@@ -1,9 +1,12 @@
 package controller;
 
-import org.bytedeco.javacv.JavaCV;
+import org.junit.Assert;
 import org.junit.Test;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
 
-import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by luiz on 08/06/17.
@@ -11,7 +14,10 @@ import static org.junit.Assert.assertEquals;
 public class TestJavaCV {
 
     @Test
-    public void shouldLoadJavaCV(){
-        assertEquals("Incorrect value for JavaCV.SQRT2", JavaCV.SQRT2, JavaCV.SQRT2, 0.1);
+    public void shouldLoadJavaCV() throws IOException {
+        File curDir = new File(".");
+        System.load(curDir.getCanonicalPath() + "/libopencv_java249.so");
+        Assert.assertNotNull("Incorrect value for JavaCV.SQRT2",
+                Mat.ones(1,1, 1).toString().equals(Mat.ones(1,1, 1).toString()));
     }
 }
