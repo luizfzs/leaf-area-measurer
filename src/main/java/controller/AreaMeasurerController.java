@@ -59,22 +59,6 @@ public class AreaMeasurerController {
                 new Point(boundingRectangle.x + boundingRectangle.width, boundingRectangle.y + boundingRectangle.height),
                 new Scalar(0, 255, 0, 0),
                 6);
-
-        Core.putText(
-                coloredAreaTemplateMat,
-                String.valueOf(dimensions.x),
-                new Point(boundingRectangle.x, boundingRectangle.y - 10),
-                Core.FONT_HERSHEY_TRIPLEX,
-                8.0,
-                new Scalar(0, 255, 0, 0));
-
-        Core.putText(
-                coloredAreaTemplateMat,
-                String.valueOf(dimensions.y),
-                new Point(boundingRectangle.x + boundingRectangle.width, boundingRectangle.y + 150),
-                Core.FONT_HERSHEY_TRIPLEX,
-                8.0,
-                new Scalar(0, 255, 0, 0));
     }
 
     private Rect getBoundingRect(ArrayList<MatOfPoint> imageContours) {
@@ -88,11 +72,6 @@ public class AreaMeasurerController {
         approxContour2f.convertTo(approxContour, CvType.CV_32S);
 
         return Imgproc.boundingRect(approxContour);
-    }
-
-    private Double getAreaFromImageFile(File imageFile, Double areaPerPixel, int matSize, int algFlags){
-        Double resultArea = null;
-        return resultArea;
     }
 
     private ArrayList<MatOfPoint> filterAreasByMinimumValue(ArrayList<MatOfPoint> imageContours) {
