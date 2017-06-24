@@ -1,5 +1,6 @@
 package controller;
 
+import com.ecyrd.speed4j.StopWatch;
 import exceptions.MoreThanOneTemplateException;
 import exceptions.NoAreaTemplateFoundException;
 import helper.DirectoryHelper;
@@ -21,7 +22,9 @@ public class MeasurerController {
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     public void processFiles(File directory, File template){
+        StopWatch swWholeMethod = new StopWatch("");
         logger.info(String.format("Entering directory %s", directory.getAbsolutePath()));
+        swWholeMethod.start();
 
         if(checkTemplateFile(directory)){
             template = getTemplateFile(directory);
@@ -46,7 +49,9 @@ public class MeasurerController {
                 }
             }
         }
-        logger.info(String.format("Leaving directory %s", directory.getAbsolutePath()));
+
+        swWholeMethod.stop();
+        logger.info(String.format("Directory processed in %s. Leaving directory %s", swWholeMethod, directory.getAbsolutePath()));
     }
 
     private boolean checkTemplateFile(File currentDirectory){
