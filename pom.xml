@@ -21,6 +21,18 @@
             <artifactId>opencv</artifactId>
             <version>LATEST</version>
         </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ecyrd.speed4j</groupId>
+            <artifactId>speed4j</artifactId>
+            <version>LATEST</version>
+        </dependency>
     </dependencies>
 
     <build>
