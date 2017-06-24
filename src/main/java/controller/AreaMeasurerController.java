@@ -1,8 +1,10 @@
 package controller;
 
+import com.ecyrd.speed4j.StopWatch;
 import helper.FileHelper;
 import model.Parameters;
 import model.TemplateInfo;
+import org.apache.log4j.Logger;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -19,7 +21,13 @@ import static org.opencv.highgui.Highgui.imwrite;
  */
 public class AreaMeasurerController {
 
+    private Logger logger = Logger.getLogger(this.getClass().getName());
+
     public TemplateInfo processAreaTemplate(File areaTemplateImage){
+        StopWatch swWholeMethod = new StopWatch("");
+        logger.info(String.format("Processing template %s", areaTemplateImage.getAbsolutePath()));
+
+        swWholeMethod.start();
         TemplateInfo templateInfo = new TemplateInfo();
         ArrayList<MatOfPoint> imageContours = new ArrayList<>();
         Rect boundingRectangle;
@@ -36,7 +44,11 @@ public class AreaMeasurerController {
             writeImage(coloredAreaTemplateMat, "identified-template.jpg");
         }
 
-        templateInfo.setRatio((dimensions.x / dimensions.y));
+        templateInfo.setRealDimension(new Point(dimensions.x, dimensions.y));
+        templateInfo.setCalculatedDimension(new Point(boundingRectangle.width, boundingRectangle.height));
+
+        swWholeMethod.stop();
+        logger.info(String.format("Template processed in %s", swWholeMethod));
         return templateInfo;
     }
 
@@ -47,22 +59,6 @@ public class AreaMeasurerController {
                 new Point(boundingRectangle.x + boundingRectangle.width, boundingRectangle.y + boundingRectangle.height),
                 new Scalar(0, 255, 0, 0),
                 6);
-
-        Core.putText(
-                coloredAreaTemplateMat,
-                String.valueOf(dimensions.x),
-                new Point(boundingRectangle.x, boundingRectangle.y - 10),
-                Core.FONT_HERSHEY_TRIPLEX,
-                8.0,
-                new Scalar(0, 255, 0, 0));
-
-        Core.putText(
-                coloredAreaTemplateMat,
-                String.valueOf(dimensions.y),
-                new Point(boundingRectangle.x + boundingRectangle.width, boundingRectangle.y + 150),
-                Core.FONT_HERSHEY_TRIPLEX,
-                8.0,
-                new Scalar(0, 255, 0, 0));
     }
 
     private Rect getBoundingRect(ArrayList<MatOfPoint> imageContours) {
@@ -76,11 +72,6 @@ public class AreaMeasurerController {
         approxContour2f.convertTo(approxContour, CvType.CV_32S);
 
         return Imgproc.boundingRect(approxContour);
-    }
-
-    private Double getAreaFromImageFile(File imageFile, Double areaPerPixel, int matSize, int algFlags){
-        Double resultArea = null;
-        return resultArea;
     }
 
     private ArrayList<MatOfPoint> filterAreasByMinimumValue(ArrayList<MatOfPoint> imageContours) {

@@ -1,14 +1,17 @@
 package controller;
 
+import com.ecyrd.speed4j.StopWatch;
 import exceptions.MoreThanOneTemplateException;
 import exceptions.NoAreaTemplateFoundException;
 import helper.DirectoryHelper;
 import model.filefilter.AreaTemplateFileFilter;
 import model.Parameters;
 import model.filefilter.LeafImageFileFilter;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -16,8 +19,12 @@ import java.util.stream.Collectors;
  */
 public class MeasurerController {
 
+    private Logger logger = Logger.getLogger(this.getClass().getName());
+
     public void processFiles(File directory, File template){
-        System.out.println(directory.getAbsolutePath());
+        StopWatch swWholeMethod = new StopWatch("");
+        logger.info(String.format("Entering directory %s", directory.getAbsolutePath()));
+        swWholeMethod.start();
 
         if(checkTemplateFile(directory)){
             template = getTemplateFile(directory);
@@ -30,19 +37,21 @@ public class MeasurerController {
 
             if(checkImageFiles(directory)) {
                 // TODO call processing method
-                System.out.println("Processing images at directory " + directory.getAbsolutePath());
-                System.out.println(Arrays.stream(getImageFiles(directory)).map(x -> x.getName()).collect(Collectors.toList()));
+                logger.info(String.format("Processing images at directory %s", directory.getAbsolutePath()));
+                logger.debug(Arrays.stream(getImageFiles(directory)).map(x -> x.getName()).collect(Collectors.toList()));
             } else {
-                System.out.println("No image files found at " + directory.getAbsolutePath());
-                System.out.println("Skipping directory " + directory.getAbsolutePath());
+                logger.warn(String.format("No image files found at %s. Skipping directory", directory.getAbsolutePath()));
             }
         } else {
-            for (File child : directory.listFiles()) {
+            for (File child : Arrays.stream(directory.listFiles()).sorted(Comparator.comparing(File::getName)).toArray(File[]::new)) {
                 if (child.isDirectory()) {
                     processFiles(child, template);
                 }
             }
         }
+
+        swWholeMethod.stop();
+        logger.info(String.format("Directory processed in %s. Leaving directory %s", swWholeMethod, directory.getAbsolutePath()));
     }
 
     private boolean checkTemplateFile(File currentDirectory){
