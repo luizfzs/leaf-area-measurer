@@ -4,7 +4,6 @@ import model.TemplateInfo;
 import model.filefilter.AreaTemplateFileFilter;
 import nu.pattern.OpenCV;
 import org.apache.log4j.Logger;
-import org.opencv.core.Scalar;
 
 import java.io.File;
 import java.io.IOException;

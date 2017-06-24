@@ -1,5 +1,6 @@
 package controller;
 
+import nu.pattern.OpenCV;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opencv.core.Core;
@@ -15,9 +16,8 @@ public class TestJavaCV {
 
     @Test
     public void shouldLoadJavaCV() throws IOException {
-        File curDir = new File(".");
-        System.load(curDir.getCanonicalPath() + "/libopencv_java249.so");
-        Assert.assertNotNull("Incorrect value for JavaCV.SQRT2",
+        OpenCV.loadShared();
+        Assert.assertNotNull("OpenCV not loaded correctly",
                 Mat.ones(1,1, 1).toString().equals(Mat.ones(1,1, 1).toString()));
     }
 }
