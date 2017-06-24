@@ -2,6 +2,7 @@ package controller;
 
 import model.TemplateInfo;
 import model.filefilter.AreaTemplateFileFilter;
+import nu.pattern.OpenCV;
 import org.apache.log4j.Logger;
 import org.opencv.core.Scalar;
 
@@ -17,7 +18,6 @@ public class MainController {
 
     public static void main(String[] args) throws IOException {
         loadOpenCV();
-        logger.debug("Successfully loaded OpenCV library");
 
         AreaMeasurerController amc = new AreaMeasurerController();
         TemplateInfo templateInfo = amc.processAreaTemplate(new File("data").listFiles(new AreaTemplateFileFilter())[0]);
@@ -25,8 +25,8 @@ public class MainController {
     }
 
     private static void loadOpenCV() throws IOException {
-        File curDir = new File(".");
-        System.load(curDir.getCanonicalPath() + "/libopencv_java249.so");
+        OpenCV.loadShared();
+        logger.debug("Successfully loaded OpenCV library");
     }
 
 }
