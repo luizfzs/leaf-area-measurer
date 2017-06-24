@@ -1,8 +1,10 @@
 package controller;
 
+import com.ecyrd.speed4j.StopWatch;
 import helper.FileHelper;
 import model.Parameters;
 import model.TemplateInfo;
+import org.apache.log4j.Logger;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -19,7 +21,13 @@ import static org.opencv.highgui.Highgui.imwrite;
  */
 public class AreaMeasurerController {
 
+    private Logger logger = Logger.getLogger(this.getClass().getName());
+
     public TemplateInfo processAreaTemplate(File areaTemplateImage){
+        StopWatch swWholeMethod = new StopWatch("");
+        logger.info(String.format("Processing template %s", areaTemplateImage.getAbsolutePath()));
+
+        swWholeMethod.start();
         TemplateInfo templateInfo = new TemplateInfo();
         ArrayList<MatOfPoint> imageContours = new ArrayList<>();
         Rect boundingRectangle;
@@ -36,7 +44,11 @@ public class AreaMeasurerController {
             writeImage(coloredAreaTemplateMat, "identified-template.jpg");
         }
 
-        templateInfo.setRatio((dimensions.x / dimensions.y));
+        templateInfo.setRealDimension(new Point(dimensions.x, dimensions.y));
+        templateInfo.setCalculatedDimension(new Point(boundingRectangle.width, boundingRectangle.height));
+
+        swWholeMethod.stop();
+        logger.info(String.format("Template processed in %s", swWholeMethod));
         return templateInfo;
     }
 
