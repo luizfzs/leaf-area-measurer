@@ -19,8 +19,8 @@ public class Parameters {
 
     public static final String AREA_TEMPLATE_DIMENSION_SEPARATOR = "x";
 
-    public static final double MIN_AREA_THRESHOLD = 10000.0;
+    public static final double MIN_AREA_THRESHOLD = 1000.0;
 
-    public static final boolean IMAGE_DEBUGGING = false;
+    public static final boolean IMAGE_DEBUGGING = true;
 
 }

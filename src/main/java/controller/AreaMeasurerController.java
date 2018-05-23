@@ -10,6 +10,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,10 +38,10 @@ public class AreaMeasurerController {
         Mat grayAreaTemplateMat = coloredAreaTemplateMat.clone();
         preProcessImage(grayAreaTemplateMat, 0, 0);
         processContours(imageContours, grayAreaTemplateMat);
-        boundingRectangle = getBoundingRect(imageContours);
+        boundingRectangle = getContourMaxArea(imageContours);
 
         if(Parameters.IMAGE_DEBUGGING) {
-            drawBoundingRectangle(boundingRectangle, dimensions, coloredAreaTemplateMat);
+            drawBoundingRectangle(boundingRectangle, coloredAreaTemplateMat);
             writeImage(coloredAreaTemplateMat, "identified-template.jpg");
         }
 
@@ -52,7 +53,42 @@ public class AreaMeasurerController {
         return templateInfo;
     }
 
-    private void drawBoundingRectangle(Rect boundingRectangle, Point dimensions, Mat coloredAreaTemplateMat) {
+    public TemplateInfo processLeafImageFile(File leafImageFile){
+        StopWatch swWholeMethod = new StopWatch("");
+        TemplateInfo templateInfo = new TemplateInfo();
+        ArrayList<MatOfPoint> imageContours = new ArrayList<>();
+        Rect boundingRectangle;
+        logger.info(String.format("Processing image %s", leafImageFile.getAbsolutePath()));
+        swWholeMethod.start();
+
+        Mat coloredAreaTemplateMat = loadImage(leafImageFile);
+        Mat grayAreaTemplateMat = coloredAreaTemplateMat.clone();
+        preProcessImage(grayAreaTemplateMat, 0, 0);
+        getHoughTransform2(grayAreaTemplateMat, 1, Math.PI/180, 200);
+//        Imgproc.morphologyEx(grayAreaTemplateMat, grayAreaTemplateMat, Imgproc.MORPH_CLOSE,
+//                Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3)));
+//        if(Parameters.IMAGE_DEBUGGING) {
+//            writeImage(grayAreaTemplateMat, String.format("%s-closed.jpg", FileHelper.getNameWithoutExtension(leafImageFile.getName())));
+//        }
+
+        processContours(imageContours, grayAreaTemplateMat);
+        List<Rect> boundingRectangles = getBoundingRects(imageContours);
+        if(Parameters.IMAGE_DEBUGGING) {
+            for(Rect rect : boundingRectangles){
+                drawBoundingRectangle(rect, coloredAreaTemplateMat);
+            }
+            writeImage(coloredAreaTemplateMat, String.format("%s-countour.jpg", FileHelper.getNameWithoutExtension(leafImageFile.getName())));
+        }
+//
+//        templateInfo.setRealDimension(new Point(dimensions.x, dimensions.y));
+//        templateInfo.setCalculatedDimension(new Point(boundingRectangle.width, boundingRectangle.height));
+
+        swWholeMethod.stop();
+        logger.info(String.format("Template processed in %s", swWholeMethod));
+        return templateInfo;
+    }
+
+    private void drawBoundingRectangle(Rect boundingRectangle, Mat coloredAreaTemplateMat) {
         Core.rectangle(
                 coloredAreaTemplateMat,
                 new Point(boundingRectangle.x, boundingRectangle.y),
@@ -61,23 +97,52 @@ public class AreaMeasurerController {
                 6);
     }
 
-    private Rect getBoundingRect(ArrayList<MatOfPoint> imageContours) {
-        MatOfPoint2f imageContour2f = new MatOfPoint2f();
-        MatOfPoint2f approxContour2f = new MatOfPoint2f();
-        MatOfPoint approxContour = new MatOfPoint();
+    private List<Rect> getBoundingRects(ArrayList<MatOfPoint> imageContours) {
+        MatOfPoint2f imageContour2f;
+        MatOfPoint2f approxContour2f;
+        MatOfPoint approxContour;
+        List<Rect> boundingRects = new ArrayList<>();
 
         imageContours = filterAreasByMinimumValue(imageContours);
-        imageContours.get(0).convertTo(imageContour2f, CvType.CV_32FC2);
-        Imgproc.approxPolyDP(imageContour2f, approxContour2f, Imgproc.arcLength(imageContour2f, true) * 0.04, true);
-        approxContour2f.convertTo(approxContour, CvType.CV_32S);
+        for(MatOfPoint matOfPoint : imageContours) {
+            imageContour2f = new MatOfPoint2f();
+            approxContour2f = new MatOfPoint2f();
+            approxContour = new MatOfPoint();
 
-        return Imgproc.boundingRect(approxContour);
+            matOfPoint.convertTo(imageContour2f, CvType.CV_32FC2);
+            Imgproc.approxPolyDP(imageContour2f, approxContour2f, Imgproc.arcLength(imageContour2f, true) * 0.04, true);
+            approxContour2f.convertTo(approxContour, CvType.CV_32S);
+
+            boundingRects.add(Imgproc.boundingRect(approxContour));
+        }
+
+        return boundingRects;
+    }
+
+    private Rect getContourMaxArea(ArrayList<MatOfPoint> imageContours) {
+        double maxContourArea = 0.0;
+        double currentContourArea;
+        MatOfPoint maxContour = null;
+        imageContours = filterAreasByMinimumValue(imageContours);
+        for(MatOfPoint matOfPoint : imageContours){
+            currentContourArea = Imgproc.contourArea(matOfPoint);
+            if(currentContourArea > maxContourArea){
+                maxContourArea = currentContourArea;
+                maxContour = matOfPoint;
+            }
+        }
+        return Imgproc.boundingRect(maxContour);
     }
 
     private ArrayList<MatOfPoint> filterAreasByMinimumValue(ArrayList<MatOfPoint> imageContours) {
+        double contourArea = 0.0;
         ArrayList<MatOfPoint> filteredList = new ArrayList<>();
         for (MatOfPoint contour: imageContours) {
-            if(Imgproc.contourArea(contour) > Parameters.MIN_AREA_THRESHOLD){
+            contourArea = Imgproc.contourArea(contour);
+            if(contourArea > 0.1) {
+//                logger.debug(String.format("Area %f", contourArea));
+            }
+            if(contourArea > Parameters.MIN_AREA_THRESHOLD){
                 filteredList.add(contour);
             }
         }
@@ -85,7 +150,8 @@ public class AreaMeasurerController {
     }
 
     private void processContours(ArrayList<MatOfPoint> imageContours, Mat image) {
-        Imgproc.findContours(image, imageContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+//        Imgproc.getStructuringElement()
+        Imgproc.findContours(image, imageContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         Imgproc.drawContours(image, imageContours, -1, new Scalar(255, 0, 0), 3);
     }
 
@@ -105,11 +171,58 @@ public class AreaMeasurerController {
         return new Point(0,0);
     }
 
+    public Mat getHoughTransform(Mat image, double rho, double theta, int threshold) {
+        Mat result = image.clone();
+        Mat lines = new Mat();
+        Imgproc.HoughLinesP(image, lines, rho, theta, threshold, 00.0, 300.0);
+
+        for (int i = 0; i < lines.cols(); i++) {
+            double data[] = lines.get(0, i);
+            double rho1 = data[0];
+            double theta1 = data[1];
+            double cosTheta = Math.cos(theta1);
+            double sinTheta = Math.sin(theta1);
+            double x0 = cosTheta * rho1;
+            double y0 = sinTheta * rho1;
+            Point pt1 = new Point(x0 + 10000 * (-sinTheta), y0 + 10000 * cosTheta);
+            Point pt2 = new Point(x0 - 10000 * (-sinTheta), y0 - 10000 * cosTheta);
+            Core.line(result, pt1, pt2, new Scalar(0, 0, 255), 10);
+        }
+        writeImage(result, "houghlines.jpg");
+        return result;
+    }
+
+    public Mat getHoughTransform2(Mat image, double rho, double theta, int threshold) {
+        Mat result = image.clone();
+        Mat lines = new Mat();
+        Mat edges = new Mat();
+
+        Imgproc.Canny(image, edges, 50, 200, 3, true);
+        writeImage(edges, "canny.jpg");
+        Imgproc.HoughLinesP(edges, lines, 1, Math.PI/180, 1, 30.0, 100.0);
+
+        writeImage(result, "result.jpg");
+        for (int i = 0; i < lines.cols(); i++) {
+            double data[] = lines.get(0, i);
+            double rho1 = data[0];
+            double theta1 = data[1];
+            double cosTheta = Math.cos(theta1);
+            double sinTheta = Math.sin(theta1);
+            double x0 = cosTheta * rho1;
+            double y0 = sinTheta * rho1;
+            Point pt1 = new Point(x0 + 10000 * (-sinTheta), y0 + 10000 * cosTheta);
+            Point pt2 = new Point(x0 - 10000 * (-sinTheta), y0 - 10000 * cosTheta);
+            Core.line(result, pt1, pt2, new Scalar(0, 0, 255), 10);
+        }
+        writeImage(result, "houghlines2.jpg");
+        return result;
+    }
+
     private void preProcessImage(Mat image, int matSize, int algFlags){
         changeLight(image, 2.0);
 
         Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.threshold(image, image, 100, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
+        Imgproc.threshold(image, image, 125, 255, Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU);
         switch (algFlags){
             case 1:
                 Imgproc.erode(image, image, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(matSize, matSize)));

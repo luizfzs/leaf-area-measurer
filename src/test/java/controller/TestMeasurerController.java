@@ -2,6 +2,7 @@ package controller;
 
 import exceptions.MoreThanOneTemplateException;
 import exceptions.NoAreaTemplateFoundException;
+import nu.pattern.OpenCV;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,13 +13,22 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
-/**
+/**FileAttribute
  * Created by luiz on 09/06/17.
  */
 public class TestMeasurerController {
 
-    public static final String AREA_TEMPLATE_1 = "area-template-1";
+    public static final String AREA_TEMPLATE_1 = "area-template-60mmx50mm";
+
+    public static final String ACTUAL_TEMPLATE_1 = "data/area-template-60mmx50mm.jpg";
+
+    public static final String ACTUAL_IMAGE_1 = "data/leaf-images/image1.jpg";
+
+    public static final String ACTUAL_IMAGE_2 = "data/leaf-images/image2.jpg";
+
     @Rule
     public TemporaryFolder root = new TemporaryFolder();
 
@@ -35,6 +45,7 @@ public class TestMeasurerController {
 
     @Before
     public void createMeasurerController(){
+        OpenCV.loadShared();
         measurerController = new MeasurerController();
     }
 
@@ -221,24 +232,31 @@ public class TestMeasurerController {
     @Test
     public void shouldPassRootDirHasOnlyAreaTemplateFile() throws IOException {
         File dir = createLeafDirectory();
-        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
+        File temp = File.createTempFile(AREA_TEMPLATE_1,".png", dir);
+        copyFile(new File(ACTUAL_TEMPLATE_1), temp);
         measurerController.processFiles(dir, null);
     }
 
     @Test
     public void shouldPassRootDirHasAreaTemplateFileAndOneImageFile() throws IOException {
         File dir = createLeafDirectory();
-        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
-        File.createTempFile("image1",".png", dir);
+        File template = File.createTempFile(AREA_TEMPLATE_1,".png", dir);
+        File image = File.createTempFile("image1",".png", dir);
+        copyFile(new File(ACTUAL_TEMPLATE_1), template);
+        copyFile(new File(ACTUAL_IMAGE_1), image);
         measurerController.processFiles(dir, null);
     }
 
     @Test
     public void shouldPassRootDirHasAreaTemplateFileAndMoreThanOneImageFile() throws IOException {
         File dir = createLeafDirectory();
-        File.createTempFile(AREA_TEMPLATE_1,".png", dir);
-        File.createTempFile("image1",".png", dir);
-        File.createTempFile("image2",".png", dir);
+        File template = File.createTempFile(AREA_TEMPLATE_1,".png", dir);
+        File image1 = File.createTempFile("image1",".png", dir);
+        File image2 = File.createTempFile("image2",".png", dir);
+
+        copyFile(new File(ACTUAL_TEMPLATE_1), template);
+        copyFile(new File(ACTUAL_IMAGE_1), image1);
+        copyFile(new File(ACTUAL_IMAGE_2), image2);
         measurerController.processFiles(dir, null);
     }
 
@@ -246,9 +264,19 @@ public class TestMeasurerController {
     public void shouldPassRootDirHasAnotherDirInside() throws IOException {
         File dir = createLeafDirectory();
         root.newFolder(dir.getName(), "data-sub1");
-        File.createTempFile(AREA_TEMPLATE_1,".png", dir.listFiles()[0]);
+        File template =  File.createTempFile(AREA_TEMPLATE_1,".png", dir.listFiles()[0]);
+        copyFile(new File(ACTUAL_TEMPLATE_1), template);
 
         measurerController.processFiles(dir, null);
+    }
+
+    public void copyFile(File src, File dst){
+        try {
+            Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

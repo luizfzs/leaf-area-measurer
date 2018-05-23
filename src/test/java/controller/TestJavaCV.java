@@ -3,10 +3,8 @@ package controller;
 import nu.pattern.OpenCV;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
-import java.io.File;
 import java.io.IOException;
 
 /**

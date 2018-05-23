@@ -1,7 +1,5 @@
 package controller;
 
-import model.TemplateInfo;
-import model.filefilter.AreaTemplateFileFilter;
 import nu.pattern.OpenCV;
 import org.apache.log4j.Logger;
 
@@ -18,9 +16,12 @@ public class MainController {
     public static void main(String[] args) throws IOException {
         loadOpenCV();
 
-        AreaMeasurerController amc = new AreaMeasurerController();
-        TemplateInfo templateInfo = amc.processAreaTemplate(new File("data").listFiles(new AreaTemplateFileFilter())[0]);
-        logger.debug(templateInfo);
+        MeasurerController mc = new MeasurerController();
+        mc.processFiles(new File("data"), null);
+
+//        AreaMeasurerController amc = new AreaMeasurerController();
+//        TemplateInfo templateInfo = amc.processAreaTemplate(new File("data").listFiles(new AreaTemplateFileFilter())[0]);
+//        logger.debug(templateInfo);
     }
 
     private static void loadOpenCV() throws IOException {
